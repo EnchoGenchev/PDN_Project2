@@ -46,15 +46,39 @@ int main(int argc, char* argv[])
 
     // TODO: malloc the two input matrices and the output matrix
     // Please use long int as the variable type
+    long *matrix1 = malloc(n_row1 * n_col1 * sizeof(long));
+    long *matrix2 = malloc(n_row2 * n_col2 * sizeof(long));
+    long *result = malloc(n_row1 * n_col2 * sizeof(long));
 
     // TODO: Parse the input csv files and fill in the input matrices
+    //parsing first file and fill in first matrix
+    for(int i = 0; i < n_row1; ++i){
+        for(int j = 0; j < n_col1; ++j){
+            fscanf(inputMatrix1, "%ld,", &matrix1[i * n_col1 + j]);
+        }
+    }
 
+    //parsing second file and fill in second matrix
+    for(int i = 0; i < n_row2; ++i){
+        for(int j = 0; j < n_col2; ++j){
+            fscanf(inputMatrix2, "%ld,", &matrix2[i * n_col2 + j]);
+        }
+    }
 
     // We are interesting in timing the matrix-matrix multiplication only
     // Record the start time
     double start = omp_get_wtime();
     
     // TODO: Parallelize the matrix-matrix multiplication
+    # pragma omp parallel for num_threads(thread_count)
+    for(int i = 0; i < n_row1; ++i){
+        for(int j = 0; j < n_col2; ++j){
+            result[i * n_col2 + j] = 0; //initialize to 0 so updating value is easy
+            for(int k = 0; k < n_col1; ++k){
+                result[i * n_col2 + j] += matrix1[i * n_col1 + k] * matrix2[k * n_col2 + j];
+            }
+        }
+    }
 
     // Record the finish time        
     double end = omp_get_wtime();
@@ -66,6 +90,14 @@ int main(int argc, char* argv[])
     fprintf(outputTime, "%f", time_passed);
 
     // TODO: save the output matrix to the output csv file
+    for(int i = 0; i < n_row1; ++i){
+        for(int j = 0; j < n_col2; ++j){
+            fprintf(outputFile, "%ld", result[i * n_col2 + j]);
+            if (j < n_col2 - 1)
+                fprintf(outputFile, ",");
+        }
+        fprintf(outputFile, "\n");
+    }
 
     // Cleanup
     fclose(inputMatrix1);
@@ -73,6 +105,9 @@ int main(int argc, char* argv[])
     fclose(outputFile);
     fclose(outputTime);
     // Remember to free your buffers!
+    free(matrix1);
+    free(matrix2);
+    free(result);
 
     return 0;
 }
