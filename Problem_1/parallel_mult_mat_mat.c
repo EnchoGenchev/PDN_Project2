@@ -74,6 +74,8 @@ int main(int argc, char* argv[])
     for(int i = 0; i < n_row1; ++i){
         for(int j = 0; j < n_col2; ++j){
             result[i * n_col2 + j] = 0; //initialize to 0 so updating value is easy
+
+            //dot product
             for(int k = 0; k < n_col1; ++k){
                 result[i * n_col2 + j] += matrix1[i * n_col1 + k] * matrix2[k * n_col2 + j];
             }
@@ -104,6 +106,7 @@ int main(int argc, char* argv[])
     fclose(inputMatrix2);
     fclose(outputFile);
     fclose(outputTime);
+    
     // Remember to free your buffers!
     free(matrix1);
     free(matrix2);
