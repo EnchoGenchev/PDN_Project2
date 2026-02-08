@@ -55,30 +55,66 @@ int main(int argc, char* argv[])
 
     double start = omp_get_wtime();
 
-    //initialize global maximum
-    long maximum = 0;
+    //initializing starting variables
+    long largest = 0;
+    long secondLargest = 0;
 
-    //using omp's reduction max
-    #pragma omp parallel for reduction(max:maximum) num_threads(thread_count) 
-    for(int j = 0; j < n_col2; ++j) { 
-        for(int i = 0; i < n_row1; ++i) {   
-            long x = 0; //just need to store in variable, not matrix
+    #pragma omp parallel num_threads(thread_count)
+    { 
+        // local versions for each thread
+        long localLargest = 0;
+        long localSecond = 0;
 
-            //dot product
-            for(int k = 0; k < n_col1; ++k){
-                x += matrix1[i * n_col1 + k] * matrix2[k * n_col2 + j];
+        #pragma omp for
+        for(int j = 0; j < n_col2; ++j) { 
+            for(int i = 0; i < n_row1; ++i) {   
+                long x = 0; //just need to store in variable, not matrix
+
+                //dot product
+                for(int k = 0; k < n_col1; ++k){
+                    x += matrix1[i * n_col1 + k] * matrix2[k * n_col2 + j];
+                }
+
+                // handling both scenarios of x
+                if (x > localLargest){
+                    localSecond = localLargest;
+                    localLargest = x;
+                }
+                else if(x > localSecond)
+                    localSecond = x;
             }
+        }
 
-            if (x > maximum)
-                maximum = x;
+        // updating shared variables largest and second largest
+        #pragma omp critical
+        {
+            if (localLargest > largest) {
+                //current largest gets demoted to second
+                if (largest > localSecond) {
+                    secondLargest = largest;
+                } 
+                else {
+                    secondLargest = localSecond;
+                }
+
+                largest = localLargest;
+            } 
+            else if (localLargest > secondLargest) {
+                secondLargest = localLargest;
+            } 
+            else if (localSecond > secondLargest) {
+                secondLargest = localSecond;
+            }
         }
     }
+
+
 
     double end = omp_get_wtime();
     double time_passed = end - start;
 
     //save results
-    fprintf(outputFile, "%ld\n", maximum);
+    fprintf(outputFile, "%ld\n", secondLargest);
     fprintf(outputTime, "%f", time_passed);
 
     // Cleanup
