@@ -17,8 +17,8 @@ int main (int argc, char *argv[])
 {
     // Catch console errors
     //  Make sure you include the # of threads and your output time file.
-    if (argc != 4) {
-        printf("USE LIKE THIS: encrypt_serial key input_text.txt output_text.txt\n");
+    if (argc != 6) {//changing value bc adding arguments
+        printf("USE LIKE THIS: encrypt_serial key input_text.txt output_text.txt time.txt num_threads\n");
         return EXIT_FAILURE;
     }
 
@@ -31,6 +31,13 @@ int main (int argc, char *argv[])
 
     // Open the output, encrypted text file
     FILE* outputFile = fopen(argv[3], "w");
+
+    //time file
+    FILE* outputTime = fopen(argv[4], "w");
+
+    //thread count
+    int thread_count  = atoi(argv[5]);
+
 
 
     // Allocate and open a buffer to read in the input
@@ -69,17 +76,28 @@ int main (int argc, char *argv[])
 
     // ----> Begin Encryption <----- //
     // Encrypt the buffer into the encrypted_buffer
+    double start = omp_get_wtime();
+
+    #pragma omp parallel for num_threads(thread_count)
     for (int i = 0; i<lSize; i++) {
-        // encrypted_buffer[i] = ??? ;  // TODO: Encrypt a character from the input buffer.
+        // TODO: Encrypt a character from the input buffer.
+        encrypted_buffer[i] = (buffer[i] + key)%256; //mod 256 to keep between 0 and 255
     }
+         
+
     if (DEBUG) printf("Values encypted! \n");
+
+    double end = omp_get_wtime();
+    double total_time = end - start;
+
 
     // Print to the output file
     for (int i = 0; i<lSize; i++) {
         fprintf(outputFile, "%c", encrypted_buffer[i]);
     }
 
-
+    //recording the time
+    fprintf(outputTime, "%f", total_time);
 
     // Cleanup
     fclose(inputFile);

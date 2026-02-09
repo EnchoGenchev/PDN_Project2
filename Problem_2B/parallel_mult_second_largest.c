@@ -96,7 +96,6 @@ int main(int argc, char* argv[])
                 else {
                     secondLargest = localSecond;
                 }
-
                 largest = localLargest;
             } 
             else if (localLargest > secondLargest) {
