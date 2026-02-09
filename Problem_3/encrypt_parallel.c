@@ -17,7 +17,7 @@ int main (int argc, char *argv[])
 {
     // Catch console errors
     //  Make sure you include the # of threads and your output time file.
-    if (argc != 6) {//changing value bc adding arguments
+    if (argc != 6) {//changing value from 4 to 6 bc adding arguments
         printf("USE LIKE THIS: encrypt_serial key input_text.txt output_text.txt time.txt num_threads\n");
         return EXIT_FAILURE;
     }
@@ -36,7 +36,7 @@ int main (int argc, char *argv[])
     FILE* outputTime = fopen(argv[4], "w");
 
     //thread count
-    int thread_count  = atoi(argv[5]);
+    int thread_count = strtol(argv[5], NULL, 10);
 
 
 

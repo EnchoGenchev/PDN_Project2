@@ -5,6 +5,8 @@
 
 int main(int argc, char* argv[])
 {
+
+    //copying structure of parallel_mult_mat_mat
     if (argc != 10)
     {
         printf("ERROR");
